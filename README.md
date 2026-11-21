@@ -1,84 +1,86 @@
 # SecureDocs Backend
 
-Spring-Boot-Backend des SecureDocs-Dokumentenportals im Modul Webtechnologien (Java 25, Maven).
+I'm building SecureDocs for my Web Technologies course at HTW Berlin. The idea is a document portal where users can upload PDFs and share them with other users.
 
-## Repositories und Live-Links
+This repo contains the backend, built with Java 25, Spring Boot and Maven. The Vue frontend has its own repository.
 
-- Backend-Repository: https://github.com/sphinxorigin/securedocs-backend
-- Frontend-Repository: https://github.com/sphinxorigin/securedocs-frontend
-- Frontend auf Render: https://securedocs-dh61.onrender.com
-- Backend-API und **Moodle-Abgabelink für M3**: https://securedocs-api-dh61.onrender.com/documents
+## Links
 
-Frontend und Backend werden unabhängig entwickelt und auf Render bereitgestellt. Die Render-Adressen bleiben nach der Repository-Trennung unverändert.
+- [Frontend repository](https://github.com/sphinxorigin/securedocs-frontend)
+- [Live app](https://securedocs-dh61.onrender.com)
+- [Backend API](https://securedocs-api-dh61.onrender.com/documents) — this is the submission link for Milestone 3.
 
-## Stand: Milestone 3
+## Current status — Milestone 3
 
-- `Document` mit ID, Dateiname und Beschreibung.
-- `GET /documents` liefert zwei Beispieldokumente als JSON.
-- Das separate Vue-Frontend lädt die Daten von dieser API.
-- Konfigurierbare CORS-Freigabe für die Frontend-Adresse.
-- Dockerfile für den Render-Webservice, Port über die Umgebungsvariable `PORT`.
-- API-Tests für JSON-Ausgabe und erlaubte/verbotene Browser-Ursprünge.
+The backend returns two sample documents from `GET /documents`. Each document has an ID, a filename and a description. The frontend fetches this list and displays it.
 
-Noch keine Dateispeicherung, Datenbank, Anmeldung oder Zugriffskontrolle. Für spätere Milestones sind PDF-Uploads, Suche, Freigaben, Downloads, Widerruf und Löschen sowie PostgreSQL vorgesehen.
+The backend also has:
 
-## Projektstruktur
+- CORS configuration for the frontend URL.
+- A Dockerfile for deployment on Render.
+- Tests for the JSON response and CORS behaviour.
 
-| Pfad | Inhalt |
+There is no database, file storage, login or access control yet. I plan to add PostgreSQL, PDF uploads, downloads, sharing, revoking access and deleting documents in later milestones. The documents returned by the API are still sample data.
+
+## Project structure
+
+| Path | Contents |
 |---|---|
-| `src/main/java/` | Spring-Boot-Anwendung, Dokumentenmodell, REST-Controller und CORS-Konfiguration |
-| `src/main/resources/application.properties` | Port und Umgebungsvariablen |
-| `src/test/` | Anwendungs- und API-Tests |
-| `pom.xml` | Maven-Konfiguration |
-| `Dockerfile` | Mehrstufiger Docker-Build mit Java 25 |
+| `src/main/java/` | Spring Boot app, document model, REST controller and CORS configuration |
+| `src/main/resources/application.properties` | Port and environment configuration |
+| `src/test/` | Application and API tests |
+| `pom.xml` | Maven configuration |
+| `Dockerfile` | Multi-stage build using Java 25 |
 
-Das Frontend liegt ausschließlich im separaten Frontend-Repository.
+The frontend code is in `securedocs-frontend`, not in this repo.
 
-## Lokal starten
+## Run locally
 
-Voraussetzung: JDK 25. Im Repository-Hauptordner:
+You need JDK 25. From the repo root, run:
 
 ```sh
 ./mvnw spring-boot:run
 ```
 
-Die API ist standardmäßig unter http://localhost:8081/documents erreichbar. Das Frontend separat aus `securedocs-frontend` starten; dessen lokale Adresse `http://localhost:5173` ist standardmäßig erlaubt.
+The API is available at [http://localhost:8081/documents](http://localhost:8081/documents).
 
-## Konfiguration
+Start the frontend separately from its own repo. The backend allows requests from `http://localhost:5173` by default.
 
-| Variable | Bedeutung | Lokaler Standard |
+## Configuration
+
+| Variable | Purpose | Local default |
 |---|---|---|
-| `PORT` | Port des Backend-Servers | `8081` |
-| `FRONTEND_URL` | Erlaubter Browser-Origin; mehrere Werte kommasepariert | `http://localhost:5173` |
+| `PORT` | Backend port | `8081` |
+| `FRONTEND_URL` | Allowed frontend origin; multiple origins can be separated by commas | `http://localhost:5173` |
 
-Auf Render ist `FRONTEND_URL=https://securedocs-dh61.onrender.com` gesetzt. Die Origin-Adresse enthält keinen abschließenden Slash.
+On Render, `FRONTEND_URL` is set to `https://securedocs-dh61.onrender.com`. Use the full origin without a trailing slash.
 
-## Render-Deployment
+## Render deployment
 
-Der bestehende Web Service `securedocs-api-dh61` nutzt dieses Backend-Repository, Branch `main`:
+The backend runs as the free web service `securedocs-api-dh61`. It uses this repo and the `main` branch.
 
-| Einstellung | Wert |
+| Setting | Value |
 |---|---|
-| Sprache | Docker |
-| Root Directory | leer (Repository-Hauptordner) |
-| Dockerfile Path | `./Dockerfile` |
-| Health Check Path | `/documents` |
-| Tarif | Free |
+| Runtime | Docker |
+| Root directory | Leave empty — repo root |
+| Dockerfile path | `./Dockerfile` |
+| Health check path | `/documents` |
+| Plan | Free |
 | `FRONTEND_URL` | `https://securedocs-dh61.onrender.com` |
 
-`PORT` wird von Render gesetzt. Der Docker-Build führt die Tests aus und erstellt das ausführbare JAR.
-Bei Einbindung über die öffentliche Git-URL Änderungen mit „Manual Deploy“ bereitstellen.
-Der kostenlose Dienst kann nach Inaktivität schlafen; der erste Aufruf dauert dann länger.
+Render sets `PORT`. The Docker build runs the tests and creates the executable JAR.
 
-## Tests und Build
+The service is connected through the public Git URL, so I use **Manual Deploy** in Render after pushing changes. The free instance can go to sleep when inactive, which makes the first request take longer.
+
+## Tests and build
 
 ```sh
 ./mvnw test
 ./mvnw package
 ```
 
-Die API-Tests starten das Backend auf einem zufälligen Port und prüfen HTTP-Status, JSON-Ausgabe sowie CORS für erlaubte und fremde Origins.
+The API tests start the backend on a random port and check the HTTP status, JSON response and CORS headers for allowed and other origins.
 
-## Historie
+## Repository history
 
-Das bisherige Repository `securedocs` wurde in `securedocs-backend` umbenannt. Die bisherige Commit-Historie bleibt erhalten; der ausgegliederte Frontend-Code ist in älteren Commits weiterhin nachvollziehbar. Die Frontend-Historie wurde zusätzlich in das eigene Repository übernommen.
+This repo was originally called `securedocs` and contained both parts of the app. I renamed it to `securedocs-backend` and moved the frontend into its own repo. The old commits are still here, and the frontend repo also keeps its earlier commit history.
