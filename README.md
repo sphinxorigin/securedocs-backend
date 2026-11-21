@@ -1,128 +1,84 @@
-# SecureDocs
+# SecureDocs Backend
 
-SecureDocs ist ein geplantes Dokumentenportal, mit dem registrierte Nutzer PDF-Dokumente hochladen, verwalten und gezielt anderen Nutzern zum Download freigeben können.
+Spring-Boot-Backend des SecureDocs-Dokumentenportals im Modul Webtechnologien (Java 25, Maven).
 
-## Geplante Funktionen
+## Repositories und Live-Links
 
-- Registrierung und Anmeldung
-- PDF-Dokumente hochladen
-- Eigene Dokumente suchen und anzeigen
-- Dokumente für andere Nutzer freigeben
-- Freigegebene Dokumente herunterladen
-- Freigaben widerrufen
-- Eigene Dokumente löschen
+- Backend-Repository: https://github.com/sphinxorigin/securedocs-backend
+- Frontend-Repository: https://github.com/sphinxorigin/securedocs-frontend
+- Frontend auf Render: https://securedocs-dh61.onrender.com
+- Backend-API und **Moodle-Abgabelink für M3**: https://securedocs-api-dh61.onrender.com/documents
 
-## Technologien
-
-- Backend: Java 25 und Spring Boot
-- Frontend: Vue 3, TypeScript und Vite
-- Geplante Datenbank: PostgreSQL
-- Deployment: Render (Docker-Webservice und statische Vue-Site)
+Frontend und Backend werden unabhängig entwickelt und auf Render bereitgestellt. Die Render-Adressen bleiben nach der Repository-Trennung unverändert.
 
 ## Stand: Milestone 3
 
-- Datenmodell `Document` mit ID, Dateiname und Beschreibung
-- `GET /documents` liefert zwei Beispieldokumente als JSON
-- Vue-Frontend im Unterordner `frontend`
-- Eigene Unterkomponente `DocumentList.vue`, die Beispieldokumente mit `v-for` darstellt
-- Suchfunktion nach Dateiname und Beschreibung
-- Frontend lädt Dokumente mit `fetch` über `GET /documents` vom Backend
-- Ladezustand, Fehleranzeige und erneuter Ladeversuch
-- CORS erlaubt die über `FRONTEND_URL` konfigurierte Frontend-Adresse
-- Dockerfile für Java 25 und Maven; Port über die Render-Variable `PORT`
-- API-Tests für JSON-Ausgabe und erlaubte/verbotene Browser-Ursprünge
-- Noch keine Dateispeicherung, Anmeldung oder Zugriffskontrolle
+- `Document` mit ID, Dateiname und Beschreibung.
+- `GET /documents` liefert zwei Beispieldokumente als JSON.
+- Das separate Vue-Frontend lädt die Daten von dieser API.
+- Konfigurierbare CORS-Freigabe für die Frontend-Adresse.
+- Dockerfile für den Render-Webservice, Port über die Umgebungsvariable `PORT`.
+- API-Tests für JSON-Ausgabe und erlaubte/verbotene Browser-Ursprünge.
+
+Noch keine Dateispeicherung, Datenbank, Anmeldung oder Zugriffskontrolle. Für spätere Milestones sind PDF-Uploads, Suche, Freigaben, Downloads, Widerruf und Löschen sowie PostgreSQL vorgesehen.
 
 ## Projektstruktur
 
 | Pfad | Inhalt |
 |---|---|
-| `src/` | Spring-Boot-Backend |
+| `src/main/java/` | Spring-Boot-Anwendung, Dokumentenmodell, REST-Controller und CORS-Konfiguration |
+| `src/main/resources/application.properties` | Port und Umgebungsvariablen |
+| `src/test/` | Anwendungs- und API-Tests |
 | `pom.xml` | Maven-Konfiguration |
-| `frontend/` | Vue-Frontend |
+| `Dockerfile` | Mehrstufiger Docker-Build mit Java 25 |
+
+Das Frontend liegt ausschließlich im separaten Frontend-Repository.
 
 ## Lokal starten
 
-### Backend
-
-Voraussetzung: JDK 25.
-
-Im Hauptordner auf Port 8081 starten:
+Voraussetzung: JDK 25. Im Repository-Hauptordner:
 
 ```sh
-./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.port=8081"
+./mvnw spring-boot:run
 ```
 
-Anschließend im Browser öffnen:
+Die API ist standardmäßig unter http://localhost:8081/documents erreichbar. Das Frontend separat aus `securedocs-frontend` starten; dessen lokale Adresse `http://localhost:5173` ist standardmäßig erlaubt.
 
-http://localhost:8081/documents
+## Konfiguration
 
-### Frontend
-
-Voraussetzung: Node.js 22.12+ oder Node.js 24 LTS.
-
-In einem weiteren Terminal vom Hauptordner aus starten:
-
-```sh
-cd frontend
-npm ci
-npm run dev
-```
-
-Anschließend die im Terminal angezeigte lokale Adresse im Browser öffnen. Das Backend muss ebenfalls laufen. Ohne weitere Konfiguration ruft das Frontend `http://localhost:8081/documents` auf. Für ein anderes Backend kann im Frontend-Ordner eine `.env.local` mit `VITE_BACKEND_URL=https://<backend>.onrender.com` angelegt werden (Vorlage: `.env.example`). Danach den Frontend-Server neu starten.
-
-Zum Prüfen der TypeScript-Typen und Erstellen des Produktionsbuilds im Ordner `frontend`:
-
-```sh
-npm run build
-```
-
-## Live-Links für Milestone 3
-
-- Frontend: https://securedocs-dh61.onrender.com
-- Backend-API und **Moodle-Abgabelink**: https://securedocs-api-dh61.onrender.com/documents
-
-Beide Dienste wurden auf Render im kostenlosen Tarif eingerichtet. Das Frontend lädt seine Daten über die öffentliche Backend-API.
-
-## Render-Deployment für Milestone 3
-
-Beide Dienste verwenden dieses Repository und den Branch `main`.
-
-| Einstellung | Backend | Frontend |
+| Variable | Bedeutung | Lokaler Standard |
 |---|---|---|
-| Diensttyp | Web Service | Static Site |
-| Sprache | Docker | – |
-| Root Directory | leer (Repository-Hauptordner) | `frontend` |
-| Dockerfile Path | `./Dockerfile` | – |
-| Build Command | aus Dockerfile | `npm ci && npm run build` |
-| Publish Directory | – | `dist` |
-| Tarif | Free | Free |
-| Health Check Path | `/documents` | – |
+| `PORT` | Port des Backend-Servers | `8081` |
+| `FRONTEND_URL` | Erlaubter Browser-Origin; mehrere Werte kommasepariert | `http://localhost:5173` |
 
-Umgebungsvariablen:
+Auf Render ist `FRONTEND_URL=https://securedocs-dh61.onrender.com` gesetzt. Die Origin-Adresse enthält keinen abschließenden Slash.
 
-- Backend: `FRONTEND_URL` = vollständige HTTPS-Adresse der Frontend-Site, ohne abschließenden Slash. Mehrere erlaubte Origins sind kommasepariert möglich. `PORT` wird von Render gesetzt.
-- Frontend: `VITE_BACKEND_URL` = vollständige HTTPS-Adresse des Backend-Dienstes, ohne `/documents`. `NODE_VERSION` = `24`.
-- Nach Änderungen an `VITE_BACKEND_URL` das Frontend neu bauen/deployen, da Vite diesen Wert beim Build übernimmt.
-- Nach Änderungen am Code beide betroffenen Dienste erneut deployen. Bei Verbindung über eine öffentliche Git-URL erfolgt das manuell über „Manual Deploy“.
+## Render-Deployment
 
-Der kostenlose Backend-Dienst kann nach Inaktivität schlafen. Der erste Aufruf dauert dann länger; die Oberfläche zeigt währenddessen einen Ladehinweis.
+Der bestehende Web Service `securedocs-api-dh61` nutzt dieses Backend-Repository, Branch `main`:
 
-### Überprüfen und abgeben
+| Einstellung | Wert |
+|---|---|
+| Sprache | Docker |
+| Root Directory | leer (Repository-Hauptordner) |
+| Dockerfile Path | `./Dockerfile` |
+| Health Check Path | `/documents` |
+| Tarif | Free |
+| `FRONTEND_URL` | `https://securedocs-dh61.onrender.com` |
 
-1. Backend-Link `https://<backend>.onrender.com/documents` öffnen: JSON-Liste mit zwei Dokumenten muss erscheinen.
-2. Frontend-Link öffnen: Beide Dokumente müssen geladen werden; im Browser-Netzwerk-Tab ist der GET-Aufruf an das Render-Backend sichtbar.
-3. Suchfeld prüfen, z. B. mit `projekt`.
-4. In Moodle für M3 den vollständigen Backend-Link **einschließlich `/documents`** einreichen.
+`PORT` wird von Render gesetzt. Der Docker-Build führt die Tests aus und erstellt das ausführbare JAR.
+Bei Einbindung über die öffentliche Git-URL Änderungen mit „Manual Deploy“ bereitstellen.
+Der kostenlose Dienst kann nach Inaktivität schlafen; der erste Aufruf dauert dann länger.
 
-Eine Datenbank, Upload und Anmeldung gehören noch nicht zu diesem Projektstand. Die Dokumente werden im Backend als Beispieldaten erzeugt.
-
-## Tests
-
-Im Hauptordner:
+## Tests und Build
 
 ```sh
 ./mvnw test
+./mvnw package
 ```
 
-Die API-Tests starten das echte Backend auf einem zufälligen Port und prüfen HTTP-Status, JSON-Daten sowie CORS für erlaubte und fremde Origins.
+Die API-Tests starten das Backend auf einem zufälligen Port und prüfen HTTP-Status, JSON-Ausgabe sowie CORS für erlaubte und fremde Origins.
+
+## Historie
+
+Das bisherige Repository `securedocs` wurde in `securedocs-backend` umbenannt. Die bisherige Commit-Historie bleibt erhalten; der ausgegliederte Frontend-Code ist in älteren Commits weiterhin nachvollziehbar. Die Frontend-Historie wurde zusätzlich in das eigene Repository übernommen.
