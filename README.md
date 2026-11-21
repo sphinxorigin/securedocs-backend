@@ -77,6 +77,13 @@ Zum Prüfen der TypeScript-Typen und Erstellen des Produktionsbuilds im Ordner `
 npm run build
 ```
 
+## Live-Links für Milestone 3
+
+- Frontend: https://securedocs-dh61.onrender.com
+- Backend-API und **Moodle-Abgabelink**: https://securedocs-api-dh61.onrender.com/documents
+
+Beide Dienste wurden auf Render im kostenlosen Tarif eingerichtet. Das Frontend lädt seine Daten über die öffentliche Backend-API.
+
 ## Render-Deployment für Milestone 3
 
 Beide Dienste verwenden dieses Repository und den Branch `main`.
